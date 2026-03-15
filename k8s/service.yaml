@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: identity-campaign-api-service
+  labels:
+    app: identity-campaign-api
+spec:
+  type: ClusterIP
+  selector:
+    app: identity-campaign-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -1,0 +1,33 @@
+name: CI - Identity Campaign Service
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restaurar dependências
+        run: dotnet restore IdentityCampaign.sln
+
+      - name: Compilar solução
+        run: dotnet build IdentityCampaign.sln --no-restore --configuration Release
+
+      - name: Executar testes
+        run: dotnet test IdentityCampaign.sln --no-build --configuration Release --verbosity normal

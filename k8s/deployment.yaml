@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-campaign-api
+  labels:
+    app: identity-campaign-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-campaign-api
+  template:
+    metadata:
+      labels:
+        app: identity-campaign-api
+    spec:
+      containers:
+        - name: identity-campaign-api
+          image: identity-campaign-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: ConnectionStrings__Postgres
+              valueFrom:
+                secretKeyRef:
+                  name: identity-campaign-secrets
+                  key: postgres-connection
+            - name: RabbitMQ__Host
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-campaign-config
+                  key: rabbitmq-host
+            - name: RabbitMQ__Port
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-campaign-config
+                  key: rabbitmq-port
+            - name: Jwt__Issuer
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-campaign-config
+                  key: jwt-issuer
+            - name: Jwt__Audience
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-campaign-config
+                  key: jwt-audience
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: identity-campaign-secrets
+                  key: jwt-key
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
