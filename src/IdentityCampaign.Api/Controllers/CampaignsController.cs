@@ -1,8 +1,12 @@
+using AutoMapper;
 using IdentityCampaign.Application.Abstractions;
-using IdentityCampaign.Application.DTOs;
+using IdentityCampaign.Application.DTOs.Campaigns;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
+using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
+using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace IdentityCampaign.Api.Controllers;
 
@@ -10,28 +14,28 @@ namespace IdentityCampaign.Api.Controllers;
 [Route("api/[controller]")]
 public class CampaignsController : ControllerBase
 {
-    private readonly ICampaignRepository _campaignRepository;
     private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-    public CampaignsController(
-        ICampaignRepository campaignRepository,
-        IMediator mediator)
+    public CampaignsController(IMediator mediator, IMapper mapper)
     {
-        _campaignRepository = campaignRepository;
         _mediator = mediator;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var campaigns = await _campaignRepository.GetAllAsync(cancellationToken);
+        var query = new GetAllCampaignCommand();
+        var campaigns = await _mediator.Send(query);
         return Ok(campaigns);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var campaign = await _campaignRepository.GetByIdAsync(id, cancellationToken);
+        var command = _mapper.Map<GetByIdCampaignCommand>(id);
+        var campaign = await _mediator.Send(command);
 
         if (campaign is null)
             return NotFound();
@@ -40,19 +44,10 @@ public class CampaignsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateCampaignRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateCampaignRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateCampaignCommand(
-            request.Title,
-            request.Description,
-            request.GoalAmount,
-            request.StartDate,
-            request.EndDate);
-
+        var command = _mapper.Map<CreateCampaignCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
-
-        return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
+        return Created(string.Empty, response);
     }
 }

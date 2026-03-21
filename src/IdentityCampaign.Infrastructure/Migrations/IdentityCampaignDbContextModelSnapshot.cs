@@ -17,7 +17,7 @@ namespace IdentityCampaign.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -42,11 +42,11 @@ namespace IdentityCampaign.Infrastructure.Migrations
                     b.Property<decimal>("GoalAmount")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
