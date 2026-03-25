@@ -8,4 +8,4 @@ public sealed record CreateCampaignCommand(
     decimal GoalAmount,
     DateTime StartDate,
     DateTime EndDate
-) : IRequest<CreateCampaignResponse>;
+) : IRequest<CreateCampaignCommandResponse>;

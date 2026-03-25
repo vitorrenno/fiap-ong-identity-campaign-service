@@ -7,6 +7,9 @@ obj/
 *.rsuser
 *.suo
 
+## Visual Studio
+.vs/
+
 ## VS Code
 .vscode/
 

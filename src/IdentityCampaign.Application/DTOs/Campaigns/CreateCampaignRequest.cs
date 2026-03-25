@@ -1,4 +1,4 @@
-namespace IdentityCampaign.Application.DTOs;
+namespace IdentityCampaign.Application.DTOs.Campaigns;
 
 public class CreateCampaignRequest
 {

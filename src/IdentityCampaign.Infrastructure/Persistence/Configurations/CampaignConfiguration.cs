@@ -10,9 +10,7 @@ public class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Title)
-            .IsRequired()
-            .HasMaxLength(150);
+        builder.Property(x => x.Title).IsRequired().HasMaxLength(150);
 
         builder.Property(x => x.Description)
             .HasMaxLength(1000);
@@ -21,7 +19,6 @@ public class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
 
         builder.Property(x => x.AmountRaised);
 
-        builder.Property(x => x.IsActive)
-            .IsRequired();
+        builder.Property(x => x.Status).IsRequired();
     }
 }

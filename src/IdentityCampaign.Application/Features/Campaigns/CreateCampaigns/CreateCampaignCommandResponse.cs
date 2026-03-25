@@ -1,6 +1,8 @@
+using IdentityCampaign.Domain.Enums;
+
 namespace IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 
-public sealed record CreateCampaignResponse(
+public sealed record CreateCampaignCommandResponse(
     Guid Id,
     string Title,
     string Description,
@@ -8,5 +10,5 @@ public sealed record CreateCampaignResponse(
     decimal AmountRaised,
     DateTime StartDate,
     DateTime EndDate,
-    bool IsActive
+    CampaignStatus Status
 );
