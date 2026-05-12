@@ -4,6 +4,8 @@ using IdentityCampaign.Application.DTOs.Campaigns;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
+using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
+using IdentityCampaign.Application.Features.Campaigns.DeleteCampaign;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -50,4 +52,31 @@ public class CampaignsController : ControllerBase
         var response = await _mediator.Send(command, cancellationToken);
         return Created(string.Empty, response);
     }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCampaignRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateCampaignCommand(
+            id,
+            request.Title,
+            request.Description,
+            request.GoalAmount,
+            request.StartDate,
+            request.EndDate
+        );
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok(response);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeleteCampaignCommand(id);
+
+        await _mediator.Send(command, cancellationToken);
+
+        return NoContent();
+    }
+
 }

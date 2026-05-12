@@ -3,8 +3,10 @@ using IdentityCampaign.Api.Utils;
 using IdentityCampaign.Application.Abstractions;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaigns;
+using IdentityCampaign.Application.Features.Campaigns.DeleteCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
+using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
@@ -42,6 +44,8 @@ builder.Services.AddAutoMapper(typeof(CampaignProfile));
 builder.Services.AddScoped<IValidator<CreateCampaignCommand>, CreateCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<GetAllCampaignCommand>, GetAllCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<GetByIdCampaignCommand>, GetByIdCampaignCommandValidator>();
+builder.Services.AddScoped<IValidator<UpdateCampaignCommand>, UpdateCampaignCommandValidator>();
+builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
 #endregion
 
 
