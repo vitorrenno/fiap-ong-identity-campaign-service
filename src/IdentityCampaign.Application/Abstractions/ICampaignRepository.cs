@@ -8,4 +8,5 @@ public interface ICampaignRepository
     Task<Campaign?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Campaign>> GetAllAsync(CancellationToken cancellationToken = default);
     Task UpdateAsync(Campaign campaign, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Campaign campaign, CancellationToken cancellationToken = default);
 }
