@@ -7,6 +7,7 @@ using IdentityCampaign.Application.Features.Campaigns.DeleteCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
+using IdentityCampaign.Application.Features.Donation.CreateDonation;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
@@ -26,18 +27,25 @@ builder.Services.AddDbContext<IdentityCampaignDbContext>(options =>
 
 #region Interfaces
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<IDonationRepository, DonationRepository>();
+
 #endregion
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 #region MediatR
+//Campaign
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateCampaignCommandHandler).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllCampaignCommandHandler).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetByIdCampaignCommandHandler).Assembly));
+//Donation
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateDonationCommandHandler).Assembly));
+
 #endregion
 
 #region AutoMapper
 builder.Services.AddAutoMapper(typeof(CampaignProfile));
+builder.Services.AddAutoMapper(typeof(DonationProfile));
 #endregion
 
 #region Validators
@@ -46,6 +54,9 @@ builder.Services.AddScoped<IValidator<GetAllCampaignCommand>, GetAllCampaignComm
 builder.Services.AddScoped<IValidator<GetByIdCampaignCommand>, GetByIdCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<UpdateCampaignCommand>, UpdateCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
+//Donation
+builder.Services.AddScoped<IValidator<CreateDonationCommand>, CreateDonationValidator>();
+
 #endregion
 
 
