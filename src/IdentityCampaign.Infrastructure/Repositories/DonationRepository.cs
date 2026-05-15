@@ -37,5 +37,12 @@ namespace IdentityCampaign.Infrastructure.Repositories
            return await _context.Donations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
+        public async Task<IReadOnlyList<Donation>> GetMeAsync(Guid idUser, CancellationToken cancellationToken = default)
+        {
+            return await _context.Donations
+                        .Where(x=>x.IdUser==idUser)
+                        .AsNoTracking()
+                        .ToListAsync(cancellationToken);
+        }
     }
 }

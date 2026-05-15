@@ -10,6 +10,7 @@ using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
 using IdentityCampaign.Application.Features.Donation.CreateDonation;
 using IdentityCampaign.Application.Features.Donation.GetAllDonation;
 using IdentityCampaign.Application.Features.Donation.GetDonationById;
+using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
@@ -43,6 +44,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetBy
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateDonationCommandHandler).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetDonationByIdCommandHandler).Assembly));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDonationCommandHandler).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetDonationMeCommandHandler).Assembly));
 
 #endregion
 
@@ -61,6 +63,7 @@ builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignComm
 builder.Services.AddScoped<IValidator<CreateDonationCommand>, CreateDonationValidator>();
 builder.Services.AddScoped<IValidator<GetDonationByIdCommand>, GetDonationByIdValidator>();
 builder.Services.AddScoped<IValidator<GetAllDonationCommand>, GetAllDonationValidator>();
+builder.Services.AddScoped<IValidator<GetDonationMeCommand>, GetDonationMeValidator>();
 
 #endregion
 

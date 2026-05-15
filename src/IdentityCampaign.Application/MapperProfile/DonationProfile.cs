@@ -3,6 +3,7 @@ using IdentityCampaign.Application.DTOs.Donation;
 using IdentityCampaign.Application.Features.Donation.CreateDonation;
 using IdentityCampaign.Application.Features.Donation.GetAllDonation;
 using IdentityCampaign.Application.Features.Donation.GetDonationById;
+using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using IdentityCampaign.Domain.Entities;
 
 namespace IdentityCampaign.Application.MapperProfile
@@ -21,6 +22,11 @@ namespace IdentityCampaign.Application.MapperProfile
             //GET ALL DONATION
             CreateMap<GetAllDonationCommand, GetAllDonationResponse>();
             CreateMap<Donation, GetAllDonationResponse>();
+            //GET ALL DONATION USERS
+            CreateMap<GetDonationMeCommand, GetDonationMeResponse>();
+            CreateMap<Donation, GetDonationMeResponse>();
+
+
         }
 
     }

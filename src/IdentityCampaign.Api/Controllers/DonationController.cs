@@ -5,6 +5,7 @@ using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using IdentityCampaign.Application.Features.Donation.CreateDonation;
 using IdentityCampaign.Application.Features.Donation.GetAllDonation;
 using IdentityCampaign.Application.Features.Donation.GetDonationById;
+using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,17 @@ namespace IdentityCampaign.Api.Controllers
             var query = new GetAllDonationCommand();
             var campaigns = await _mediator.Send(query);
             return Ok(campaigns);
+        }
+        [HttpGet("GetDonationByUser/{idUser}")]
+        public async Task<IActionResult> GetDonationByUser(Guid idUser, CancellationToken cancellationToken)
+        {
+            var command = _mapper.Map<GetDonationMeCommand>(idUser);
+            var donations = await _mediator.Send(command);
+
+            if (donations is null)
+                return NotFound();
+
+            return Ok(donations);
         }
 
     }
