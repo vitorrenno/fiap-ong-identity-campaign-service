@@ -1,9 +1,10 @@
 using AutoMapper;
-using IdentityCampaign.Application.DTOs.Campaigns;
 using IdentityCampaign.Application.DTOs.Donation;
-using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
+using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using IdentityCampaign.Application.Features.Donation.CreateDonation;
+using IdentityCampaign.Application.Features.Donation.GetAllDonation;
+using IdentityCampaign.Application.Features.Donation.GetDonationById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +28,24 @@ namespace IdentityCampaign.Api.Controllers
             var command = _mapper.Map<CreateDonationCommand>(request);
             var response = await _mediator.Send(command, cancellationToken);
             return Created(string.Empty, response);
+        }
+        [HttpGet("{id}")]   
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+        {
+            var command = _mapper.Map<GetDonationByIdCommand>(id);
+            var donation = await _mediator.Send(command);
+
+            if (donation is null)
+                return NotFound();
+
+            return Ok(donation);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var query = new GetAllDonationCommand();
+            var campaigns = await _mediator.Send(query);
+            return Ok(campaigns);
         }
 
     }

@@ -8,6 +8,8 @@ using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
 using IdentityCampaign.Application.Features.Donation.CreateDonation;
+using IdentityCampaign.Application.Features.Donation.GetAllDonation;
+using IdentityCampaign.Application.Features.Donation.GetDonationById;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
@@ -28,7 +30,6 @@ builder.Services.AddDbContext<IdentityCampaignDbContext>(options =>
 #region Interfaces
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<IDonationRepository, DonationRepository>();
-
 #endregion
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -40,6 +41,8 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAl
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetByIdCampaignCommandHandler).Assembly));
 //Donation
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateDonationCommandHandler).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetDonationByIdCommandHandler).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetAllDonationCommandHandler).Assembly));
 
 #endregion
 
@@ -56,6 +59,8 @@ builder.Services.AddScoped<IValidator<UpdateCampaignCommand>, UpdateCampaignComm
 builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
 //Donation
 builder.Services.AddScoped<IValidator<CreateDonationCommand>, CreateDonationValidator>();
+builder.Services.AddScoped<IValidator<GetDonationByIdCommand>, GetDonationByIdValidator>();
+builder.Services.AddScoped<IValidator<GetAllDonationCommand>, GetAllDonationValidator>();
 
 #endregion
 
