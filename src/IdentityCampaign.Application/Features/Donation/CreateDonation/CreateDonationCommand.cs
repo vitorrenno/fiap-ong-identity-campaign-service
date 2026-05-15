@@ -7,11 +7,10 @@ using MediatR;
 
 namespace IdentityCampaign.Application.Features.Donation.CreateDonation
 {
-    public class CreateDonationCommand : IRequest<CreateDonationResponse>
+    public sealed record CreateDonationCommand : IRequest<CreateDonationResponse>
     {
         public decimal vAmount { get; set; }
         public Guid IdCampaign { get; set; }
         public Guid IdUser { get; set; }
-
     }
 }
