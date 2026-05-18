@@ -19,7 +19,7 @@ public class CampaignRepository : ICampaignRepository
         await _context.Campaigns.AddAsync(campaign, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
     }
-
+    
     public async Task<Campaign?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Campaigns.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
