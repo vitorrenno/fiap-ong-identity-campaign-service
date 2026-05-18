@@ -1,4 +1,6 @@
 using FluentValidation;
+using IdentityCampaign.Api.Monitoring;
+using IdentityCampaign.Api.Monitoring.MonitoringMiddleware;
 using IdentityCampaign.Api.Utils;
 using IdentityCampaign.Application.Abstractions;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
@@ -16,6 +18,8 @@ using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
+using Prometheus.DotNetRuntime;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +63,11 @@ builder.Services.AddScoped<IValidator<GetAllCampaignCommand>, GetAllCampaignComm
 builder.Services.AddScoped<IValidator<GetByIdCampaignCommand>, GetByIdCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<UpdateCampaignCommand>, UpdateCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
+#endregion
+
+#region Monitoring
+builder.Services.AddSingleton<IMetricsService, MetricsService>();
+builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
 //Donation
 builder.Services.AddScoped<IValidator<CreateDonationCommand>, CreateDonationValidator>();
 builder.Services.AddScoped<IValidator<GetDonationByIdCommand>, GetDonationByIdValidator>();
@@ -78,6 +87,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+DotNetRuntimeStatsBuilder.Default().StartCollecting();
+
+app.UseRouting();
+
+app.UseMiddleware<MonitoringMiddleware>();
+app.MapMetrics();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
