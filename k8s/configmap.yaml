@@ -2,8 +2,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: identity-campaign-config
+  namespace: hackathon-9nett
 data:
-  rabbitmq-host: "rabbitmq"
-  rabbitmq-port: "5672"
-  jwt-issuer: "IdentityCampaign.Api"
-  jwt-audience: "IdentityCampaign.Client"
+  ASPNETCORE_ENVIRONMENT: "Development"
+  ASPNETCORE_URLS: "http://+:80"
+  MYSQL_CONNECTION: "Server=mysql;Port=3306;Database=hackathondb;User=root;Password=root;"
+  RABBITMQ_HOST: "rabbitmq"
