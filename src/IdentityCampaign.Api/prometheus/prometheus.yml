@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'identity-campaign-api'
+
+    metrics_path: '/metrics'
+
+    scheme: http
+
+    static_configs:
+      - targets: ['host.docker.internal:5080']
