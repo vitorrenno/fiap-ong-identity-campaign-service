@@ -14,8 +14,10 @@ using IdentityCampaign.Application.Features.Donation.GetAllDonation;
 using IdentityCampaign.Application.Features.Donation.GetDonationById;
 using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using IdentityCampaign.Application.MapperProfile;
+using IdentityCampaign.Application.Messaging.Events;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
+using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Prometheus;
@@ -76,6 +78,16 @@ builder.Services.AddScoped<IValidator<GetDonationMeCommand>, GetDonationMeValida
 
 #endregion
 
+#region MassTransit
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<DonationReceivedConsumer>();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        MassTransitConfiguration.Configure(context, cfg);
+    });
+});
+#endregion
 
 var app = builder.Build();
 
