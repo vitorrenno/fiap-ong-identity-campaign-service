@@ -24,7 +24,6 @@ public static class MigrationHelper
             throw;
         }
     }
-    // Wait for Docker to start up before applying migrations automatically.
     public static async Task WaitForMySqlAsync(string connectionString)
     {
         var maxRetries = 30;
@@ -39,12 +38,17 @@ public static class MigrationHelper
                 connectionString = $"{strConn[0]};{strConn[1]};{strConn[3]};{strConn[4]};";
                 using var connection = new MySqlConnection(connectionString);
                 await connection.OpenAsync();
-                Console.WriteLine("MySQL está pronto!");
+                Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] MySQL está pronto! Conexão estabelecida com sucesso.");
                 return;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{DateTime.Now} Tentativa {i}/{maxRetries} falhou: {ex.Message}");
+                if (i == maxRetries)
+                {
+                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERRO: MySQL não ficou pronto após {maxRetries} tentativas.");
+                    throw;
+                }
+                Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Tentativa {i}/{maxRetries} falhou: {ex.Message}");
                 await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
             }
         }

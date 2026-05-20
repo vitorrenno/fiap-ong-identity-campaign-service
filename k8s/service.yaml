@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: identity-campaign-service
+  name: identity-campaign
   namespace: hackathon-9nett
 spec:
+  type: ClusterIP
   selector:
     app: identity-campaign
   ports:
     - name: http
-      protocol: TCP
-      port: 80
+      port: 8080
+      targetPort: 8080

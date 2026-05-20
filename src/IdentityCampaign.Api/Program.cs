@@ -82,14 +82,31 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-#region Banco de dados LOCAL
-string connString = builder.Configuration.GetConnectionString(name: "DefaultConnection") ?? "";
-//DOCKER PRECISA ESTAR RODANDO PARA O PROJETO FUNCIONAR
-await Api.Services.DockerMySqlManager.EnsureMySqlContainerRunningAsync(connString);
-//ESPERA MY SQL ACORDAR PARA APLICAR AS MIGRATIONS
-await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
-//APLICA AS MIGRATIONS
-IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+#region Banco de dados
+var environment = builder.Environment.EnvironmentName;
+
+if (environment == Environments.Development)
+{
+    string connString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+
+    // Apenas para DEV LOCAL (fora do K8s)
+    try
+    {
+        await Api.Services.DockerMySqlManager.EnsureMySqlContainerRunningAsync(connString);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Aviso: Não foi possível gerenciar container Docker. Se está em K8s, isso é esperado. Erro: {ex.Message}");
+    }
+
+    await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
+    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+}
+else
+{
+    // Kubernetes / Staging / Production
+    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+}
 #endregion
 
 app.Run();
