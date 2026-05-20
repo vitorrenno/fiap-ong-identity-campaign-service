@@ -44,5 +44,15 @@ public class CampaignRepository : ICampaignRepository
         _context.Campaigns.Remove(campaign);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task IncrementRaisedAmountAsync(Guid campaignId, decimal value, CancellationToken cancellationToken = default)
+    {
+        var campaign = await _context.Campaigns.FindAsync([campaignId], cancellationToken)
+            ?? throw new KeyNotFoundException($"Campanha com ID {campaignId} não encontrada.");
+
+        campaign.AddRaisedAmount(value);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
 
