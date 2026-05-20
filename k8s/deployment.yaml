@@ -5,6 +5,11 @@ metadata:
   namespace: hackathon-9nett
   labels:
     app: identity-campaign
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 0
+    maxUnavailable: 1
 spec:
   replicas: 1
   selector:
