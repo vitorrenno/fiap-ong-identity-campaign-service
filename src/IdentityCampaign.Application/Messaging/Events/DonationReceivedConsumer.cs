@@ -14,9 +14,15 @@ namespace IdentityCampaign.Application.Messaging.Events
 
         public async Task Consume(ConsumeContext<DonationReceivedEvent> context)
         {
-            var evento = context.Message;
+            DonationReceivedEvent evento = context.Message;
 
-            await _campaignRepository.IncrementRaisedAmountAsync(evento.campaignId, evento.DonationValue);
+            Console.WriteLine(
+                $"[RabbitMQ] DonationReceivedEvent consumido | " +
+                $"CampaignId: {evento.CampaignId} | " +
+                $"Valor: {evento.DonationValue:C} | " +
+                $"Timestamp: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+
+            await _campaignRepository.IncrementRaisedAmountAsync(evento.CampaignId, evento.DonationValue);
         }
     }
 }

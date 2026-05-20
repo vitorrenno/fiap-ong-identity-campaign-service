@@ -2,7 +2,7 @@ namespace IdentityCampaign.Application.Messaging.Events
 {
     public record DonationReceivedEvent(
         Guid DonationId,
-        Guid campaignId,
+        Guid CampaignId,
         decimal DonationValue,
         DateTime ConfirmedAt
     );
