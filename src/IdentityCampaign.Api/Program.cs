@@ -110,14 +110,57 @@ app.MapMetrics();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-#region Banco de dados LOCAL
-string connString = builder.Configuration.GetConnectionString(name: "DefaultConnection") ?? "";
-//DOCKER PRECISA ESTAR RODANDO PARA O PROJETO FUNCIONAR
-await Api.Services.DockerMySqlManager.EnsureMySqlContainerRunningAsync(connString);
-//ESPERA MY SQL ACORDAR PARA APLICAR AS MIGRATIONS
-await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
-//APLICA AS MIGRATIONS
-IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+#region Banco de dados
+var environment = builder.Environment.EnvironmentName;
+var connString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ========================================");
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Iniciando aplicação em ambiente: {environment}");
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ========================================");
+
+if (environment == Environments.Development)
+{
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Modo DESENVOLVIMENTO detectado.");
+
+    // Apenas para DEV LOCAL (fora do K8s)
+    try
+    {
+        await Api.Services.DockerMySqlManager.EnsureMySqlContainerRunningAsync(connString);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ⚠ Aviso: Não foi possível gerenciar container Docker. Se está em K8s, isso é esperado. Erro: {ex.Message}");
+    }
+
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aguardando MySQL estar pronto...");
+    await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
+
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicando migrations...");
+    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+}
+else
+{
+    // Kubernetes / Staging / Production
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Modo PRODUÇÃO/KUBERNETES detectado.");
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aguardando MySQL estar pronto...");
+
+    try
+    {
+        await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✗ ERRO CRÍTICO ao conectar no MySQL: {ex.Message}");
+        throw;
+    }
+
+    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicando migrations...");
+    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+}
+
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ========================================");
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicação iniciada com sucesso!");
+Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ========================================");
 #endregion
 
 app.Run();
