@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: identity-campaign-migrations
+  namespace: hackathon-9nett
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: identity-campaign:latest
+          command: ["dotnet", "IdentityCampaign.Api.dll", "migrate"]
+          envFrom:
+            - configMapRef:
+                name: identity-campaign-config
