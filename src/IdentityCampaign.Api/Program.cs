@@ -15,6 +15,7 @@ using IdentityCampaign.Application.Features.Donation.GetDonationById;
 using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Application.Messaging.Events;
+using IdentityCampaign.Infrastructure;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
 using MassTransit;
@@ -129,14 +130,14 @@ if (environment == Environments.Development)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ⚠ Aviso: Não foi possível gerenciar container Docker. Se está em K8s, isso é esperado. Erro: {ex.Message}");
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aviso: Não foi possível gerenciar container Docker. Se está em K8s, isso é esperado. Erro: {ex.Message}");
     }
 
     Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aguardando MySQL estar pronto...");
-    await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
+    await MigrationHelper.WaitForMySqlAsync(connString);
 
     Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicando migrations...");
-    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+    MigrationHelper.ApplyMigrations(app);
 }
 else
 {
@@ -146,16 +147,20 @@ else
 
     try
     {
-        await IdentityCampaign.Infrastructure.MigrationHelper.WaitForMySqlAsync(connString);
+        await MigrationHelper.WaitForMySqlAsync(connString);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✗ ERRO CRÍTICO ao conectar no MySQL: {ex.Message}");
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERRO CRÍTICO ao conectar no MySQL: {ex.Message}");
         throw;
     }
 
-    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicando migrations...");
-    IdentityCampaign.Infrastructure.MigrationHelper.ApplyMigrations(app);
+    if (args.Contains("migrate"))
+    {
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Aplicando migrations...");
+        MigrationHelper.ApplyMigrations(app);
+        return;
+    }
 }
 
 Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ========================================");

@@ -5,32 +5,50 @@ metadata:
   namespace: hackathon-9nett
   labels:
     app: identity-campaign
-strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 0
-    maxUnavailable: 1
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+
   selector:
     matchLabels:
       app: identity-campaign
+
   template:
     metadata:
       labels:
         app: identity-campaign
+
     spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.0
+          command:
+            - sh
+            - -c
+            - |
+              echo "Aguardando MySQL..."
+              until mysqladmin ping -h mysql -u root -p$MYSQL_ROOT_PASSWORD --silent; do
+                sleep 3
+              done
+              echo "MySQL pronto!"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+
       containers:
         - name: identity-campaign
-          image: identity-campaign:v2
+          image: identity-campaign:latest
           imagePullPolicy: Always
 
           ports:
             - containerPort: 8080
-
-          env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: "Kubernetes"
 
           envFrom:
             - configMapRef:
