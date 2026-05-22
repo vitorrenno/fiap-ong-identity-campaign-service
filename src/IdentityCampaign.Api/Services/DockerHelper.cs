@@ -12,6 +12,11 @@ namespace Api.Services
 
         private static DockerClient GetClient()
         {
+            // Detectar se está em Kubernetes/container
+            bool isInKubernetes = Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST") != null;
+            if (isInKubernetes)
+                throw new InvalidOperationException("Não é possível gerenciar containers Docker em ambiente Kubernetes. Use MySQL como serviço externo.");
+
             Uri dockerUri;
 
             if (OperatingSystem.IsWindows())
