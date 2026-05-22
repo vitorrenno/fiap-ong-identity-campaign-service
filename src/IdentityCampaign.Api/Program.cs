@@ -1,6 +1,6 @@
 using FluentValidation;
+using IdentityCampaign.Api.Extensions;
 using IdentityCampaign.Api.Monitoring;
-using IdentityCampaign.Api.Monitoring.MonitoringMiddleware;
 using IdentityCampaign.Api.Utils;
 using IdentityCampaign.Application.Abstractions;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
@@ -21,6 +21,8 @@ using IdentityCampaign.Infrastructure.Repositories;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using Prometheus;
 using Prometheus.DotNetRuntime;
 
@@ -66,17 +68,16 @@ builder.Services.AddScoped<IValidator<GetAllCampaignCommand>, GetAllCampaignComm
 builder.Services.AddScoped<IValidator<GetByIdCampaignCommand>, GetByIdCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<UpdateCampaignCommand>, UpdateCampaignCommandValidator>();
 builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
-#endregion
-
-#region Monitoring
-builder.Services.AddSingleton<IMetricsService, MetricsService>();
 builder.Services.AddScoped<IValidator<DeleteCampaignCommand>, DeleteCampaignCommandValidator>();
 //Donation
 builder.Services.AddScoped<IValidator<CreateDonationCommand>, CreateDonationValidator>();
 builder.Services.AddScoped<IValidator<GetDonationByIdCommand>, GetDonationByIdValidator>();
 builder.Services.AddScoped<IValidator<GetAllDonationCommand>, GetAllDonationValidator>();
 builder.Services.AddScoped<IValidator<GetDonationMeCommand>, GetDonationMeValidator>();
+#endregion
 
+#region Monitoring
+builder.Services.AddSingleton<IMetricsService, MetricsService>();
 #endregion
 
 #region MassTransit
@@ -105,7 +106,7 @@ DotNetRuntimeStatsBuilder.Default().StartCollecting();
 
 app.UseRouting();
 
-app.UseMiddleware<MonitoringMiddleware>();
+app.UseRequestMetrics();
 app.MapMetrics();
 
 app.MapControllers();

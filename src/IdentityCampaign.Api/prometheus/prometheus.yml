@@ -9,4 +9,4 @@ scrape_configs:
     scheme: http
 
     static_configs:
-      - targets: ['host.docker.internal:5080']
+      - targets: ['identitycampaign.api:8080']
