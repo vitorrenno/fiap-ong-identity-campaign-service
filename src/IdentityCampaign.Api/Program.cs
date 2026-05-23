@@ -3,6 +3,7 @@ using IdentityCampaign.Api.Monitoring;
 using IdentityCampaign.Api.Monitoring.MonitoringMiddleware;
 using IdentityCampaign.Api.Utils;
 using IdentityCampaign.Application.Abstractions;
+using IdentityCampaign.Application.Common;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaigns;
 using IdentityCampaign.Application.Features.Campaigns.DeleteCampaign;
@@ -16,17 +17,104 @@ using IdentityCampaign.Application.Features.Donation.GetDonationMe;
 using IdentityCampaign.Application.MapperProfile;
 using IdentityCampaign.Infrastructure.Persistence;
 using IdentityCampaign.Infrastructure.Repositories;
+using IdentityCampaign.Infrastructure.Services;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Prometheus;
 using Prometheus.DotNetRuntime;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityCampaign API", Version = "v1" });
+
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"{token}\""
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
+    });
+});
 builder.Services.AddHealthChecks();
+
+string? jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+if (!string.IsNullOrEmpty(jwtKey))
+{
+    builder.Configuration["Jwt:Key"] = jwtKey;
+}
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+builder.Services.AddScoped<IDonorRepository, DonorRepository>();
+builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// Adicionar CORS para permitir requisições de diferentes origens
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"[JWT] Falha na autenticação: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("[JWT] Token validado com sucesso");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                Console.WriteLine($"[JWT] Challenge: {context.ErrorDescription}");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole(RoleConstants.Admin));
+    options.AddPolicy("RequireDonorRole", policy => policy.RequireRole(RoleConstants.Donor));
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<IdentityCampaignDbContext>(options =>
@@ -86,11 +174,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 DotNetRuntimeStatsBuilder.Default().StartCollecting();
-
-app.UseRouting();
 
 app.UseMiddleware<MonitoringMiddleware>();
 app.MapMetrics();

@@ -11,7 +11,7 @@ namespace IdentityCampaign.Application.Abstractions
     {
         Task AddAsync(Donation donation, CancellationToken cancellationToken = default);
 
-        Task<Donation> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Donation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task<IReadOnlyList<Donation>> GetAllAsync(CancellationToken cancellationToken = default);
 

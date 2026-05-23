@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IdentityCampaign.Application\IdentityCampaign.Application.csproj" />
     <ProjectReference Include="..\..\src\IdentityCampaign.Domain\IdentityCampaign.Domain.csproj" />
+    <ProjectReference Include="..\..\src\IdentityCampaign.Infrastructure\IdentityCampaign.Infrastructure.csproj" />
     <ProjectReference Include="..\IdentityCampaign.IntegrationTests\IdentityCampaign.IntegrationTests.csproj" />
   </ItemGroup>
 

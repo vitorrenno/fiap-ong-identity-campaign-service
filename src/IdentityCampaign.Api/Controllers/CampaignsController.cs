@@ -1,5 +1,6 @@
 using AutoMapper;
 using IdentityCampaign.Application.Abstractions;
+using IdentityCampaign.Application.Common;
 using IdentityCampaign.Application.DTOs.Campaigns;
 using IdentityCampaign.Application.Features.Campaigns.CreateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.GetAllCampaign;
@@ -7,6 +8,7 @@ using IdentityCampaign.Application.Features.Campaigns.GetCampaignById;
 using IdentityCampaign.Application.Features.Campaigns.UpdateCampaign;
 using IdentityCampaign.Application.Features.Campaigns.DeleteCampaign;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -14,6 +16,7 @@ namespace IdentityCampaign.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CampaignsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -26,6 +29,7 @@ public class CampaignsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var query = new GetAllCampaignCommand();
@@ -34,6 +38,7 @@ public class CampaignsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
         var command = _mapper.Map<GetByIdCampaignCommand>(id);
@@ -46,6 +51,7 @@ public class CampaignsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = RoleConstants.Admin)]
     public async Task<IActionResult> Create([FromBody] CreateCampaignRequest request, CancellationToken cancellationToken)
     {
         var command = _mapper.Map<CreateCampaignCommand>(request);
@@ -53,6 +59,7 @@ public class CampaignsController : ControllerBase
         return Created(string.Empty, response);
     }
     [HttpPut("{id}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCampaignRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateCampaignCommand(
@@ -70,6 +77,7 @@ public class CampaignsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = RoleConstants.Admin)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteCampaignCommand(id);
