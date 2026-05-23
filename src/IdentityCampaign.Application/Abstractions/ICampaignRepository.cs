@@ -9,4 +9,5 @@ public interface ICampaignRepository
     Task<IReadOnlyList<Campaign>> GetAllAsync(CancellationToken cancellationToken = default);
     Task UpdateAsync(Campaign campaign, CancellationToken cancellationToken = default);
     Task DeleteAsync(Campaign campaign, CancellationToken cancellationToken = default);
+    Task IncrementRaisedAmountAsync(Guid campaignId, decimal value, CancellationToken cancellationToken = default);
 }
